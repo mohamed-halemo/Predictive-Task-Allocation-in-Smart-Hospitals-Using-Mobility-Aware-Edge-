@@ -479,7 +479,7 @@ class HospitalSimulation:
                         actor.in_examination = False
                         actor.examination_room = None
             
-            if room.should_shutdown():
+            if room.should_shutdown() and self.predictive_mode:
                 shutdown_count, shutdown_time = room.shutdown_equipment()
                 if shutdown_count > 0:
                     self.metrics['equipment_shutdowns'] += shutdown_count
