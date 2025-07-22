@@ -147,22 +147,22 @@ class Room:
         """Initialize realistic medical equipment with accurate specifications"""
         equipment_map = {
             RoomType.ICU: [
-                Equipment("Ventilator", 1.5, 800.0),
-                Equipment("Heart Monitor", 0.8, 200.0),
-                Equipment("IV Pump", 1, 150.0),
-                Equipment("Defibrillator", 2, 400.0)
+                Equipment("Ventilator", 15/3, 800.0),
+                Equipment("Heart Monitor", 8/5, 200.0),
+                Equipment("IV Pump", 10/5, 150.0),
+                Equipment("Defibrillator", 20/5, 400.0)
             ],
             RoomType.RADIOLOGY: [
-                Equipment("X-Ray Machine", 4.5, 1500.0),
-                Equipment("CT Scanner", 4.5, 3000.0),
-                Equipment("MRI", 9, 5000.0),
-                Equipment("Ultrasound", 2, 300.0)
+                Equipment("X-Ray Machine", 45/5, 1500.0),
+                Equipment("CT Scanner", 45/5, 3000.0),
+                Equipment("MRI", 90/5, 5000.0),
+                Equipment("Ultrasound", 20/5, 300.0)
             ],
             RoomType.LAB: [
-                Equipment("Blood Analyzer", 1.5, 1200.0),
-                Equipment("Microscope", 4.5, 100.0),
-                Equipment("Centrifuge", 1.2, 600.0),
-                Equipment("PCR Machine", 1.5, 900.0)
+                Equipment("Blood Analyzer", 15/5, 1200.0),
+                Equipment("Microscope", 45/5, 100.0),
+                Equipment("Centrifuge", 12/5, 600.0),
+                Equipment("PCR Machine", 15/5, 900.0)
             ],
             RoomType.LOBBY: [],
             RoomType.PATIENT_ROOM: [],
@@ -277,7 +277,7 @@ class Room:
         shutdown_count = 0
         total_shutdown_time = 0
         
-        if time.time() - self.last_occupancy_time > 30.0:
+        if time.time() - self.last_occupancy_time > 60.0:
             for equipment in self.equipment:
                 shutdown_time = equipment.start_shutdown()
                 if shutdown_time > 0:
@@ -517,8 +517,15 @@ class HospitalSimulation:
         new_room = self._get_room_from_position(canvas_x, canvas_y)
         old_room = actor.current_room
         # Update actor position
-        actor.position.x = canvas_x
+        actor.position.x = canvas_x + 40
         actor.position.y = canvas_y
+
+        if (actor.actor_type == ActorType.PATIENT):
+            actor.position.y += 50
+        
+        if (actor.actor_type == ActorType.DOCTOR):
+            actor.position.y -= 50
+
         actor.position.room = new_room
         if new_room != old_room:
             actor.current_room = new_room
@@ -541,9 +548,9 @@ class HospitalSimulation:
             {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 8/5},
 
             # Radiology
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 1},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 1},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 8/5},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 16/5},
 
             # Laboratory
             {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 2},
@@ -618,15 +625,16 @@ class HospitalSimulation:
                 self.rooms[RoomType.ICU].start_equipment_preload()
             self.predictive_stage = 1
             return True
+            return True
         elif self.predictive_stage == 1:
-            if doctor.current_room != sequence[self.predictive_step]:
-                self.move_actor_to_position(doctor, x, y)
+            if patient.current_room != sequence[self.predictive_step]:
+                self.move_actor_to_position(patient, x, y)
                 return True
             self.predictive_stage = 2
             return True
         elif self.predictive_stage == 2:
-            if patient.current_room != sequence[self.predictive_step]:
-                self.move_actor_to_position(patient, x, y)
+            if doctor.current_room != sequence[self.predictive_step]:
+                self.move_actor_to_position(doctor, x, y)
                 return True
             self.predictive_step += 1
             self.predictive_stage = 0
