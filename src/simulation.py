@@ -536,29 +536,28 @@ class HospitalSimulation:
         
         simulation_sequences = [
             # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 5},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 1},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 1},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 8/5},
 
-            # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 6},
+            # Radiology
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 1},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 1},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 8/5},
 
-            # Start from Lobby to Emergency Room
+            # Laboratory
             {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 2},
             {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 6},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 13/5},
 
-            # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 6},
-
-            # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 2},
+            # ICU
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 3},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 3},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 4},
+            # ICU
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 3},
             {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 3},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 3},
         ]
         
         if self.auto_simulation_step < len(simulation_sequences):
