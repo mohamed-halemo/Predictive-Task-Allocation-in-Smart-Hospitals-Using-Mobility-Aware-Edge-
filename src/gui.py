@@ -258,7 +258,7 @@ class HospitalGUI:
         """Run the predictive auto demo with preloading logic."""
         if not self.simulation.auto_simulation_running and self.running:
             if self.simulation.auto_simulation_step_execute_predictive():
-                self.root.after(3000, self.auto_simulation_predictive_loop)
+                self.root.after(1000, self.auto_simulation_predictive_loop)
             else:
                 self.log_activity("AUTO DEMO: Predictive cycle complete, restarting...")
                 self.root.after(5000, self.auto_simulation_predictive_loop)
@@ -272,7 +272,7 @@ class HospitalGUI:
         """Run the automated demo loop"""
         if self.simulation.auto_simulation_running and self.running:
             if self.simulation.auto_simulation_step_execute():
-                self.root.after(3000, self.auto_simulation_loop)
+                self.root.after(1000, self.auto_simulation_loop)
             else:
                 self.log_activity("AUTO DEMO: Cycle complete, restarting...")
                 self.root.after(5000, self.auto_simulation_loop)

@@ -147,22 +147,22 @@ class Room:
         """Initialize realistic medical equipment with accurate specifications"""
         equipment_map = {
             RoomType.ICU: [
-                Equipment("Ventilator", 15/3, 800.0),
-                Equipment("Heart Monitor", 8/5, 200.0),
-                Equipment("IV Pump", 10/5, 150.0),
-                Equipment("Defibrillator", 20/5, 400.0)
+                Equipment("Ventilator", 15/10, 800.0),
+                Equipment("Heart Monitor", 8/10, 200.0),
+                Equipment("IV Pump", 10/10, 150.0),
+                Equipment("Defibrillator", 20/10, 400.0)
             ],
             RoomType.RADIOLOGY: [
-                Equipment("X-Ray Machine", 45/5, 1500.0),
-                Equipment("CT Scanner", 45/5, 3000.0),
-                Equipment("MRI", 90/5, 5000.0),
-                Equipment("Ultrasound", 20/5, 300.0)
+                Equipment("X-Ray Machine", 45/10, 1500.0),
+                Equipment("CT Scanner", 45/10, 3000.0),
+                Equipment("MRI", 90/10, 5000.0),
+                Equipment("Ultrasound", 20/10, 300.0)
             ],
             RoomType.LAB: [
-                Equipment("Blood Analyzer", 15/5, 1200.0),
-                Equipment("Microscope", 45/5, 100.0),
-                Equipment("Centrifuge", 12/5, 600.0),
-                Equipment("PCR Machine", 15/5, 900.0)
+                Equipment("Blood Analyzer", 15/10, 1200.0),
+                Equipment("Microscope", 45/10, 100.0),
+                Equipment("Centrifuge", 12/10, 600.0),
+                Equipment("PCR Machine", 15/10, 900.0)
             ],
             RoomType.LOBBY: [],
             RoomType.PATIENT_ROOM: [],
@@ -543,28 +543,28 @@ class HospitalSimulation:
         
         simulation_sequences = [
             # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 1},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 1},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 8/5},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
 
             # Radiology
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 16/5},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
 
             # Laboratory
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 13/5},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 10},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB, 'delay': 10},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 10},
 
             # ICU
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 3},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 3},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 4},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 10},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 10},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 10},
             # ICU
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 3},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 3},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 3},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 10},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 10},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 10},
         ]
         
         if self.auto_simulation_step < len(simulation_sequences):
@@ -593,6 +593,7 @@ class HospitalSimulation:
             return False
         # Define the sequence
         sequence = [
+            
             RoomType.LOBBY,
             RoomType.EMERGENCY_ROOM,
             RoomType.RADIOLOGY,
