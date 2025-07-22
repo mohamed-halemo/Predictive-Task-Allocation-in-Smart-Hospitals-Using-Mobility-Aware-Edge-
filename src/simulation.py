@@ -428,9 +428,9 @@ class HospitalSimulation:
     
     def _create_rooms(self):
         return {
-            RoomType.LOBBY: Room(RoomType.LOBBY, (0, 0), (300, 200)),
+            RoomType.RADIOLOGY: Room(RoomType.RADIOLOGY, (0, 0), (300, 200)),
             RoomType.ICU: Room(RoomType.ICU, (0, 200), (300, 200)),
-            RoomType.RADIOLOGY: Room(RoomType.RADIOLOGY, (300, 0), (300, 200)),
+            RoomType.LOBBY: Room(RoomType.LOBBY, (300, 0), (300, 200)),
             RoomType.LAB: Room(RoomType.LAB, (300, 200), (300, 200)),
             RoomType.PATIENT_ROOM: Room(RoomType.PATIENT_ROOM, (600, 0), (300, 200))
         }

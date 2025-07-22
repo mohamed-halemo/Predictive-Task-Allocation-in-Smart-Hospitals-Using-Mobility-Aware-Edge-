@@ -19,7 +19,7 @@ class HospitalGUI:
         self.performance_analyzer = PerformanceAnalyzer(self.metrics_tracker)
         
         self.canvas_width = 900
-        self.canvas_height = 700
+        self.canvas_height = 400
         
         self.selected_actor = None
         self.drag_start_x = 0
@@ -264,9 +264,9 @@ class HospitalGUI:
         self.canvas.delete("room")
         
         rooms_layout = [
-            ("Lobby", 0, 0, 300, 200, "lightblue"),
+            ("Radiology", 0, 0, 300, 200, "lightgreen"),
             ("ICU", 0, 200, 300, 200, "lightcoral"),
-            ("Radiology", 300, 0, 300, 200, "lightgreen"),
+            ("Lobby", 300, 0, 300, 200, "lightblue"),
             ("Laboratory", 300, 200, 300, 200, "lightyellow"),
             ("Patient Room", 600, 0, 300, 200, "plum1"),
             ("Emergency Room", 600, 200, 300, 200, "red")
