@@ -432,7 +432,8 @@ class HospitalSimulation:
             RoomType.ICU: Room(RoomType.ICU, (0, 200), (300, 200)),
             RoomType.LOBBY: Room(RoomType.LOBBY, (300, 0), (300, 200)),
             RoomType.LAB: Room(RoomType.LAB, (300, 200), (300, 200)),
-            RoomType.PATIENT_ROOM: Room(RoomType.PATIENT_ROOM, (600, 0), (300, 200))
+            RoomType.PATIENT_ROOM: Room(RoomType.PATIENT_ROOM, (600, 0), (300, 200)),
+            RoomType.EMERGENCY_ROOM: Room(RoomType.EMERGENCY_ROOM, (600, 200), (300, 200))
         }
     
     def set_predictive_mode(self, mode: bool):
@@ -514,109 +515,45 @@ class HospitalSimulation:
     def move_actor_to_position(self, actor: Actor, canvas_x: int, canvas_y: int):
         """Move actor to specific canvas position and handle workflow"""
         new_room = self._get_room_from_position(canvas_x, canvas_y)
-        
-        if new_room != actor.current_room:
-            movement_start_time = time.time()
-            time_saved = 0
-            total_delay = 0
-            prediction_made = False
-            predicted_room = None
-            
-            # Predictive mode logic
-            if self.predictive_mode and actor.actor_type in [ActorType.DOCTOR, ActorType.PATIENT]:
-                predicted_room, confidence = self.prediction_engine.predict_movement(actor, self.rooms)
-                prediction_made = True
-                
-                # Only preload if we have confidence
-                if confidence > 0.6 and predicted_room != RoomType.LOBBY:
-                    delay_saved, preloaded_count = self.rooms[predicted_room].start_equipment_preload()
-                    self.metrics['resources_preloaded'] += preloaded_count
-                    
-                    # If prediction was correct, calculate time saved
-                    if predicted_room == new_room:
-                        time_saved = delay_saved
-                        self.metrics['total_delay_saved'] += time_saved
-            
-            # Handle room entry
-            old_room = actor.current_room
-            room = self.rooms[new_room]
-            
-            if actor.actor_type == ActorType.STAFF and new_room != RoomType.LOBBY:
-                # Staff enters and activates equipment
-                delay, activated_count = room.staff_enters_room()
-                if not self.predictive_mode or new_room != predicted_room:
-                    total_delay = delay
-                    self.metrics['total_delay_incurred'] += delay
-                self.metrics['equipment_activations'] += activated_count
-                
-                # Learn staff pattern
-                self.prediction_engine.learn_staff_pattern(actor, self.rooms)
-            
-            # Update accuracy if prediction was made
-            if prediction_made:
-                self.prediction_engine.update_accuracy(predicted_room, new_room)
-            
-            # Update actor position
-            actor.current_room = new_room
-            actor.movement_history.append(old_room)
-            actor.last_movement_time = time.time()
-            
-            # Calculate net time effect
-            net_time_effect = time_saved - total_delay
-            self.metrics['time_savings_per_movement'].append(net_time_effect)
-            self.metrics['total_time_saved'] += net_time_effect
-            
-            # Log movement
-            movement_info = {
-                'actor_id': actor.actor_id,
-                'actor_type': actor.actor_type.value,
-                'from_room': old_room.value,
-                'to_room': new_room.value,
-                'time_saved': time_saved,
-                'delay_incurred': total_delay,
-                'net_effect': net_time_effect,
-                'predictive_mode': self.predictive_mode,
-                'timestamp': time.time()
-            }
-            self.movement_log.append(movement_info)
-            
-            self.metrics['tasks_completed'] += 1
-            self.metrics['manual_movements'] += 1
-        
-        # Update position
+        old_room = actor.current_room
+        # Update actor position
         actor.position.x = canvas_x
         actor.position.y = canvas_y
         actor.position.room = new_room
-    
+        if new_room != old_room:
+            actor.current_room = new_room
+            actor.movement_history.append(old_room)
+            actor.last_movement_time = time.time()
+            # Only activate devices if nurse enters (manual activation)
+            if actor.actor_type == ActorType.STAFF and new_room != RoomType.LOBBY:
+                room = self.rooms[new_room]
+                room.staff_enters_room()
+
     def auto_simulation_step_execute(self):
         """Perform one step of automated simulation"""
         if not self.actors:
             return False
         
         simulation_sequences = [
-            # Morning ICU rounds
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 2},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 3},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 5},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 1},
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 1},
-            
-            # Radiology procedures
+            # Start from Lobby to Emergency Room
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 2},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 3},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 5},
+
+            # Radiology
             {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 2},
             {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 3},
             {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 5},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 1},
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 1},
-            
-            # Laboratory testing
+
+            # Laboratory
             {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 2},
             {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 3},
             {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB, 'delay': 4},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 2},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 1},
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 3},
+
+            # ICU
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 2},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 3},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 5},
         ]
         
         if self.auto_simulation_step < len(simulation_sequences):
@@ -639,6 +576,63 @@ class HospitalSimulation:
             self.auto_simulation_step = 0
             return False
     
+    def auto_simulation_step_execute_predictive(self):
+        """Perform one step of automated simulation with predictive preloading."""
+        if not self.actors:
+            return False
+        # Define the sequence
+        sequence = [
+            RoomType.LOBBY,
+            RoomType.EMERGENCY_ROOM,
+            RoomType.RADIOLOGY,
+            RoomType.LAB,
+            RoomType.ICU
+        ]
+        if not hasattr(self, 'predictive_step'):
+            self.predictive_step = 0
+            self.predictive_stage = 0
+        if self.predictive_step >= len(sequence):
+            self.predictive_step = 0
+            self.predictive_stage = 0
+            return False
+        room = self.rooms[sequence[self.predictive_step]]
+        x = room.position[0] + room.size[0] // 2
+        y = room.position[1] + room.size[1] // 2
+        nurse = self.get_actor(ActorType.STAFF)
+        doctor = self.get_actor(ActorType.DOCTOR)
+        patient = self.get_actor(ActorType.PATIENT)
+        # Movement logic
+        if self.predictive_stage == 0:
+            if nurse.current_room != sequence[self.predictive_step]:
+                self.move_actor_to_position(nurse, x, y)
+                return True
+            # Nurse has just arrived in the new room, now trigger preloading for the next rooms
+            if sequence[self.predictive_step] == RoomType.EMERGENCY_ROOM:
+                self.rooms[RoomType.RADIOLOGY].start_equipment_preload()
+                self.rooms[RoomType.LAB].start_equipment_preload()
+            if sequence[self.predictive_step] == RoomType.LAB:
+                self.rooms[RoomType.ICU].start_equipment_preload()
+            self.predictive_stage = 1
+            return True
+        elif self.predictive_stage == 1:
+            if doctor.current_room != sequence[self.predictive_step]:
+                self.move_actor_to_position(doctor, x, y)
+                return True
+            self.predictive_stage = 2
+            return True
+        elif self.predictive_stage == 2:
+            if patient.current_room != sequence[self.predictive_step]:
+                self.move_actor_to_position(patient, x, y)
+                return True
+            self.predictive_step += 1
+            self.predictive_stage = 0
+            return True
+        return False
+    
+    def reset_predictive_auto_demo(self):
+        self.predictive_step = 0
+        self.predictive_stage = 0
+
     def _get_room_from_position(self, x: int, y: int) -> RoomType:
         for room_type, room in self.rooms.items():
             if room.contains_point(x, y):
@@ -665,3 +659,7 @@ class HospitalSimulation:
             'energy_efficiency_percent': energy_efficiency,
             'resources_preloaded': self.metrics['resources_preloaded']
         }
+
+    def get_actor(self, actor_type):
+        """Return the first actor of the given type, or None if not found."""
+        return next((a for a in self.actors if a.actor_type == actor_type), None)

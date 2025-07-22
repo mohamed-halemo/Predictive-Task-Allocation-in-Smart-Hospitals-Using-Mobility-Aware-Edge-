@@ -79,7 +79,7 @@ class HospitalGUI:
         ttk.Button(sim_frame, text="🎮 Manual Mode (Drag & Drop)", 
                   command=self.start_manual_mode).pack(fill=tk.X, pady=1)
         ttk.Button(sim_frame, text="🤖 Auto Demo (Realistic)", 
-                  command=self.start_auto_simulation).pack(fill=tk.X, pady=1)
+                  command=self.pick_simulation).pack(fill=tk.X, pady=1)
         ttk.Button(sim_frame, text="⏹️ Stop Auto Demo", 
                   command=self.stop_auto_simulation).pack(fill=tk.X, pady=1)
         
@@ -234,16 +234,34 @@ class HospitalGUI:
         """Enable manual drag & drop control"""
         self.simulation.auto_simulation_running = False
         self.log_activity("MANUAL MODE: Drag actors between rooms")
-    
+    def pick_simulation(self):
+        if self.mode_var.get()==False:
+            self.start_auto_simulation()
+        else:
+            self.auto_simulation_predictive_loop()
     def start_auto_simulation(self):
         """Start realistic automated hospital workflow demo"""
         if not self.simulation.actors:
             messagebox.showwarning("Warning", "Please add actors first!")
             return
-        
+        if self.mode_var.get():  # Predictive mode is selected
+            self.simulation.reset_predictive_auto_demo()
+            self.simulation.auto_simulation_running = True
+            self.log_activity("AUTO DEMO: Predictive mode with preloading started")
+            self.auto_simulation_predictive_loop()
+            return
         self.simulation.auto_simulation_running = True
         self.log_activity("AUTO DEMO: Realistic hospital workflow started")
         self.auto_simulation_loop()
+
+    def auto_simulation_predictive_loop(self):
+        """Run the predictive auto demo with preloading logic."""
+        if not self.simulation.auto_simulation_running and self.running:
+            if self.simulation.auto_simulation_step_execute_predictive():
+                self.root.after(3000, self.auto_simulation_predictive_loop)
+            else:
+                self.log_activity("AUTO DEMO: Predictive cycle complete, restarting...")
+                self.root.after(5000, self.auto_simulation_predictive_loop)
     
     def stop_auto_simulation(self):
         """Stop automated simulation"""
