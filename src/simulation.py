@@ -164,7 +164,9 @@ class Room:
                 Equipment("Centrifuge", 3.0, 600.0),
                 Equipment("PCR Machine", 6.0, 900.0)
             ],
-            RoomType.LOBBY: []
+            RoomType.LOBBY: [],
+            RoomType.PATIENT_ROOM: [],
+            RoomType.EMERGENCY_ROOM: [],
         }
         return equipment_map.get(self.room_type, [])
     
@@ -429,7 +431,8 @@ class HospitalSimulation:
             RoomType.LOBBY: Room(RoomType.LOBBY, (0, 0), (300, 200)),
             RoomType.ICU: Room(RoomType.ICU, (0, 200), (300, 200)),
             RoomType.RADIOLOGY: Room(RoomType.RADIOLOGY, (300, 0), (300, 200)),
-            RoomType.LAB: Room(RoomType.LAB, (300, 200), (300, 200))
+            RoomType.LAB: Room(RoomType.LAB, (300, 200), (300, 200)),
+            RoomType.PATIENT_ROOM: Room(RoomType.PATIENT_ROOM, (600, 0), (300, 200))
         }
     
     def set_predictive_mode(self, mode: bool):
