@@ -118,7 +118,7 @@ class HospitalGUI:
         performance_labels = [
             'Total Tasks', 'Examinations Done', 'Prediction Accuracy',
             'Time Saved (s)', 'Time Lost (s)', 'Net Time Benefit (s)',
-            'Current Power (kW)', 'Energy Saved (kWh)'
+            'Current Power (kW)', 'Total Power (kW)' ,'Energy Saved (kWh)'
         ]
         for metric in performance_labels:
             label = ttk.Label(performance_frame, text=f"{metric}: 0", font=("Arial", 8))
@@ -557,7 +557,7 @@ RECOMMENDATIONS:
         
         # Update energy metrics
         current_power, sleep_savings = self.simulation.calculate_energy_consumption()
-        energy_consumed = current_power * 1 / 3600  # Convert to kWh for 1-second interval
+        energy_consumed = current_power  # Convert to kWh for 1-second interval
         self.metrics_tracker.update_energy_metrics(energy_consumed, sleep_savings)
     
     def update_display(self):
@@ -620,7 +620,7 @@ RECOMMENDATIONS:
         """Update all performance metrics displays"""
         # Calculate current values
         current_power, sleep_savings = self.simulation.calculate_energy_consumption()
-        summary = self.simulation.get_performance_summary()
+        summary = self.metrics_tracker.get_performance_summary()
         
         # Update metrics
         self.performance_metrics['Total Tasks'].config(
@@ -643,6 +643,9 @@ RECOMMENDATIONS:
         )
         self.performance_metrics['Current Power (kW)'].config(
             text=f"Current Power (kW): {current_power/1000:.2f}"
+        )
+        self.performance_metrics['Total Power (kW)'].config(
+            text=f"Total Power (kW): {summary['energy_consumed_kwh']:.2f}"
         )
         self.performance_metrics['Energy Saved (kWh)'].config(
             text=f"Energy Saved (kWh): {summary['energy_saved_kwh']:.3f}"

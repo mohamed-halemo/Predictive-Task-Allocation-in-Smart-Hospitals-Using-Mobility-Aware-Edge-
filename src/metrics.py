@@ -89,10 +89,6 @@ class MetricsTracker:
         self.metrics['total_energy_consumed'] += energy_consumed
         self.metrics['energy_saved_sleep'] += sleep_savings
     
-    def increment_counter(self, metric_name: str, value: int = 1):
-        """Increment a counter metric"""
-        if metric_name in self.metrics:
-            self.metrics[metric_name] += value
     
     def get_performance_summary(self, prediction_accuracy: float = 0.0) -> Dict[str, Any]:
         """Generate comprehensive performance summary"""
@@ -211,60 +207,6 @@ class PerformanceAnalyzer:
     
     def __init__(self, metrics_tracker: MetricsTracker):
         self.metrics_tracker = metrics_tracker
-    
-    def analyze_prediction_effectiveness(self, prediction_engine) -> Dict[str, Any]:
-        """Analyze the effectiveness of the prediction engine"""
-        if not prediction_engine.recent_predictions:
-            return {'message': 'No predictions made yet'}
-        
-        correct_predictions = 0
-        total_predictions = len(prediction_engine.recent_predictions)
-        
-        confidence_levels = [p['confidence'] for p in prediction_engine.recent_predictions]
-        avg_confidence = sum(confidence_levels) / len(confidence_levels)
-        
-        # Analyze prediction accuracy by confidence level
-        high_confidence_predictions = [p for p in prediction_engine.recent_predictions if p['confidence'] > 0.8]
-        high_confidence_accuracy = 0
-        if high_confidence_predictions:
-            # This would need actual movement outcomes to calculate properly
-            # For now, we'll use the overall accuracy
-            high_confidence_accuracy = prediction_engine.prediction_accuracy
-        
-        return {
-            'total_predictions': total_predictions,
-            'accuracy_percent': prediction_engine.prediction_accuracy,
-            'average_confidence': avg_confidence,
-            'high_confidence_accuracy': high_confidence_accuracy,
-            'predictions_per_minute': total_predictions / max(1, (time.time() - self.metrics_tracker.start_time) / 60)
-        }
-    
-    def analyze_energy_efficiency(self, simulation) -> Dict[str, Any]:
-        """Analyze energy efficiency patterns"""
-        total_power = 0
-        sleep_power = 0
-        active_equipment = 0
-        sleeping_equipment = 0
-        
-        for room in simulation.rooms.values():
-            for equipment in room.equipment:
-                if equipment.state.value in ['READY', 'IN_USE', 'PRELOADED']:
-                    total_power += equipment.power_consumption
-                    active_equipment += 1
-                elif equipment.state.value == 'SLEEP':
-                    sleep_power += equipment.sleep_power
-                    sleeping_equipment += 1
-        
-        efficiency_ratio = sleep_power / max(1, total_power) * 100
-        
-        return {
-            'current_total_power_kw': total_power / 1000,
-            'current_sleep_power_kw': sleep_power / 1000,
-            'active_equipment_count': active_equipment,
-            'sleeping_equipment_count': sleeping_equipment,
-            'sleep_efficiency_percent': efficiency_ratio,
-            'total_energy_saved_kwh': self.metrics_tracker.metrics['energy_saved_sleep'] / 1000
-        }
     
     def generate_recommendations(self, simulation) -> List[str]:
         """Generate optimization recommendations based on current performance"""
