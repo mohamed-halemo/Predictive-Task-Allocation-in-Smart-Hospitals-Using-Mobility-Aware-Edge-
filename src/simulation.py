@@ -404,6 +404,7 @@ class HospitalSimulation:
         self.running = False
         self.auto_simulation_running = False
         self.predictive_mode = True
+        self.current_room = RoomType.LOBBY
         
         # Metrics will be handled by the metrics module
         self.metrics = {
@@ -543,28 +544,28 @@ class HospitalSimulation:
         
         simulation_sequences = [
             # Start from Lobby to Emergency Room
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM, 'delay': 10},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.EMERGENCY_ROOM},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.EMERGENCY_ROOM},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.EMERGENCY_ROOM},
 
             # Radiology
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY, 'delay': 10},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.RADIOLOGY},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.RADIOLOGY},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.RADIOLOGY},
 
             # Laboratory
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB, 'delay': 10},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB, 'delay': 10},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB, 'delay': 10},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LAB},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LAB},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LAB},
 
             # ICU
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU, 'delay': 10},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU, 'delay': 10},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU, 'delay': 10},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.ICU},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.ICU},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.ICU},
             # ICU
-            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY, 'delay': 10},
-            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY, 'delay': 10},
-            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY, 'delay': 10},
+            {'actor_type': ActorType.STAFF, 'target_room': RoomType.LOBBY},
+            {'actor_type': ActorType.PATIENT, 'target_room': RoomType.LOBBY},
+            {'actor_type': ActorType.DOCTOR, 'target_room': RoomType.LOBBY},
         ]
         
         if self.auto_simulation_step < len(simulation_sequences):
@@ -579,9 +580,13 @@ class HospitalSimulation:
                 target_x = room.position[0] + room.size[0] // 2
                 target_y = room.position[1] + room.size[1] // 2
                 
-                self.move_actor_to_position(actor, target_x, target_y)
-                
-            self.auto_simulation_step += 1
+                if ((self.current_room != target_room) and (not (self.rooms[self.current_room]).check_equipment_ready()) # if changing room & current room is not ready 
+                    and (self.current_room in [RoomType.ICU, RoomType.LAB, RoomType.RADIOLOGY])):                        # & current room has equipment
+                    print("Waiting")
+                else: 
+                    self.move_actor_to_position(actor, target_x, target_y)
+                    self.current_room = target_room
+                    self.auto_simulation_step += 1
             return True
         else:
             self.auto_simulation_step = 0

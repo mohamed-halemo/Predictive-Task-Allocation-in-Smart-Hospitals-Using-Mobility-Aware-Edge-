@@ -238,17 +238,12 @@ class HospitalGUI:
         if self.mode_var.get()==False:
             self.start_auto_simulation()
         else:
+            self.simulation.auto_simulation_running = True
             self.auto_simulation_predictive_loop()
     def start_auto_simulation(self):
         """Start realistic automated hospital workflow demo"""
         if not self.simulation.actors:
             messagebox.showwarning("Warning", "Please add actors first!")
-            return
-        if self.mode_var.get():  # Predictive mode is selected
-            self.simulation.reset_predictive_auto_demo()
-            self.simulation.auto_simulation_running = True
-            self.log_activity("AUTO DEMO: Predictive mode with preloading started")
-            self.auto_simulation_predictive_loop()
             return
         self.simulation.auto_simulation_running = True
         self.log_activity("AUTO DEMO: Realistic hospital workflow started")
@@ -256,7 +251,7 @@ class HospitalGUI:
 
     def auto_simulation_predictive_loop(self):
         """Run the predictive auto demo with preloading logic."""
-        if not self.simulation.auto_simulation_running and self.running:
+        if self.simulation.auto_simulation_running and self.running:
             if self.simulation.auto_simulation_step_execute_predictive():
                 self.root.after(1000, self.auto_simulation_predictive_loop)
             else:
