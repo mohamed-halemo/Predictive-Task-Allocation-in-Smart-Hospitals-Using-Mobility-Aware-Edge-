@@ -277,7 +277,7 @@ class Room:
         shutdown_count = 0
         total_shutdown_time = 0
         
-        if time.time() - self.last_occupancy_time > 60.0:
+        if time.time() - self.last_occupancy_time > 30.0:
             for equipment in self.equipment:
                 shutdown_time = equipment.start_shutdown()
                 if shutdown_time > 0:
@@ -603,7 +603,8 @@ class HospitalSimulation:
             RoomType.EMERGENCY_ROOM,
             RoomType.RADIOLOGY,
             RoomType.LAB,
-            RoomType.ICU
+            RoomType.ICU,
+            RoomType.LOBBY
         ]
         if not hasattr(self, 'predictive_step'):
             self.predictive_step = 0
@@ -630,7 +631,6 @@ class HospitalSimulation:
             if sequence[self.predictive_step] == RoomType.LAB:
                 self.rooms[RoomType.ICU].start_equipment_preload()
             self.predictive_stage = 1
-            return True
             return True
         elif self.predictive_stage == 1:
             if patient.current_room != sequence[self.predictive_step]:
