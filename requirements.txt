@@ -1,0 +1,30 @@
+# Smart Hospital Predictive System - Requirements
+# Python 3.7+ required
+
+# Core dependencies (included with Python)
+# tkinter - GUI framework (usually included with Python)
+# typing - Type hints (Python 3.5+)
+# dataclasses - Data structures (Python 3.7+)
+# pathlib - Path handling (Python 3.4+)
+# logging - Logging framework (built-in)
+# time - Time utilities (built-in)
+# random - Random number generation (built-in)
+
+# Optional dependencies for enhanced functionality
+# numpy>=1.21.0          # Numerical computing (for advanced analytics)
+# pandas>=1.3.0          # Data manipulation (for metrics analysis)
+# matplotlib>=3.4.0      # Plotting (for performance visualization)
+# scikit-learn>=1.0.0    # Machine learning (for advanced predictions)
+
+# Development dependencies
+# pytest>=6.0.0          # Testing framework
+# black>=21.0.0          # Code formatting
+# flake8>=3.9.0          # Linting
+# mypy>=0.910            # Type checking
+
+# Documentation
+# sphinx>=4.0.0          # Documentation generation
+# sphinx-rtd-theme>=0.5.0 # Read the Docs theme
+
+# Note: The core application runs with only Python standard library
+# Additional packages are optional for enhanced features 

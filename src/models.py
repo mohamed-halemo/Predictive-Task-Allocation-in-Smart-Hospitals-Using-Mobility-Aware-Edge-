@@ -7,6 +7,8 @@ class RoomType(Enum):
     ICU = "ICU"
     RADIOLOGY = "Radiology Room"
     LAB = "Lab"
+    PATIENT_ROOM = "Patient Room"
+    EMERGENCY_ROOM = "Emergency Room"
 
 class ActorType(Enum):
     STAFF = "Staff"

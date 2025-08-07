@@ -18,7 +18,7 @@ class HospitalGUI:
         self.metrics_tracker = MetricsTracker()
         self.performance_analyzer = PerformanceAnalyzer(self.metrics_tracker)
         
-        self.canvas_width = 600
+        self.canvas_width = 900
         self.canvas_height = 400
         
         self.selected_actor = None
@@ -79,7 +79,7 @@ class HospitalGUI:
         ttk.Button(sim_frame, text="🎮 Manual Mode (Drag & Drop)", 
                   command=self.start_manual_mode).pack(fill=tk.X, pady=1)
         ttk.Button(sim_frame, text="🤖 Auto Demo (Realistic)", 
-                  command=self.start_auto_simulation).pack(fill=tk.X, pady=1)
+                  command=self.pick_simulation).pack(fill=tk.X, pady=1)
         ttk.Button(sim_frame, text="⏹️ Stop Auto Demo", 
                   command=self.stop_auto_simulation).pack(fill=tk.X, pady=1)
         
@@ -118,7 +118,7 @@ class HospitalGUI:
         performance_labels = [
             'Total Tasks', 'Examinations Done', 'Prediction Accuracy',
             'Time Saved (s)', 'Time Lost (s)', 'Net Time Benefit (s)',
-            'Current Power (kW)', 'Energy Saved (kWh)'
+            'Current Power (kW)', 'Total Power (kW)' ,'Energy Saved (kWh)'
         ]
         for metric in performance_labels:
             label = ttk.Label(performance_frame, text=f"{metric}: 0", font=("Arial", 8))
@@ -234,16 +234,29 @@ class HospitalGUI:
         """Enable manual drag & drop control"""
         self.simulation.auto_simulation_running = False
         self.log_activity("MANUAL MODE: Drag actors between rooms")
-    
+    def pick_simulation(self):
+        if self.mode_var.get()==False:
+            self.start_auto_simulation()
+        else:
+            self.simulation.auto_simulation_running = True
+            self.auto_simulation_predictive_loop()
     def start_auto_simulation(self):
         """Start realistic automated hospital workflow demo"""
         if not self.simulation.actors:
             messagebox.showwarning("Warning", "Please add actors first!")
             return
-        
         self.simulation.auto_simulation_running = True
         self.log_activity("AUTO DEMO: Realistic hospital workflow started")
         self.auto_simulation_loop()
+
+    def auto_simulation_predictive_loop(self):
+        """Run the predictive auto demo with preloading logic."""
+        if self.simulation.auto_simulation_running and self.running:
+            if self.simulation.auto_simulation_step_execute_predictive():
+                self.root.after(1000, self.auto_simulation_predictive_loop)
+            else:
+                self.log_activity("AUTO DEMO: Predictive cycle complete, restarting...")
+                self.root.after(5000, self.auto_simulation_predictive_loop)
     
     def stop_auto_simulation(self):
         """Stop automated simulation"""
@@ -254,7 +267,7 @@ class HospitalGUI:
         """Run the automated demo loop"""
         if self.simulation.auto_simulation_running and self.running:
             if self.simulation.auto_simulation_step_execute():
-                self.root.after(3000, self.auto_simulation_loop)
+                self.root.after(1000, self.auto_simulation_loop)
             else:
                 self.log_activity("AUTO DEMO: Cycle complete, restarting...")
                 self.root.after(5000, self.auto_simulation_loop)
@@ -264,10 +277,12 @@ class HospitalGUI:
         self.canvas.delete("room")
         
         rooms_layout = [
-            ("Lobby", 0, 0, 300, 200, "lightblue"),
+            ("Radiology", 0, 0, 300, 200, "lightgreen"),
             ("ICU", 0, 200, 300, 200, "lightcoral"),
-            ("Radiology", 300, 0, 300, 200, "lightgreen"),
-            ("Laboratory", 300, 200, 300, 200, "lightyellow")
+            ("Lobby", 300, 0, 300, 200, "lightblue"),
+            ("Laboratory", 300, 200, 300, 200, "lightyellow"),
+            ("Patient Room", 600, 0, 300, 200, "plum1"),
+            ("Emergency Room", 600, 200, 300, 200, "red")
         ]
         
         for name, x, y, w, h, color in rooms_layout:
@@ -555,7 +570,7 @@ RECOMMENDATIONS:
         
         # Update energy metrics
         current_power, sleep_savings = self.simulation.calculate_energy_consumption()
-        energy_consumed = current_power * 1 / 3600  # Convert to kWh for 1-second interval
+        energy_consumed = current_power  # Convert to kWh for 1-second interval
         self.metrics_tracker.update_energy_metrics(energy_consumed, sleep_savings)
     
     def update_display(self):
@@ -618,7 +633,7 @@ RECOMMENDATIONS:
         """Update all performance metrics displays"""
         # Calculate current values
         current_power, sleep_savings = self.simulation.calculate_energy_consumption()
-        summary = self.simulation.get_performance_summary()
+        summary = self.metrics_tracker.get_performance_summary()
         
         # Update metrics
         self.performance_metrics['Total Tasks'].config(
@@ -641,6 +656,9 @@ RECOMMENDATIONS:
         )
         self.performance_metrics['Current Power (kW)'].config(
             text=f"Current Power (kW): {current_power/1000:.2f}"
+        )
+        self.performance_metrics['Total Power (kW)'].config(
+            text=f"Total Power (kW): {summary['energy_consumed_kwh']:.2f}"
         )
         self.performance_metrics['Energy Saved (kWh)'].config(
             text=f"Energy Saved (kWh): {summary['energy_saved_kwh']:.3f}"
